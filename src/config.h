@@ -4,13 +4,13 @@
 // Pin mapping (ESP32 DevKit v1 -> XY-160D)
 // ---------------------------------------------------------------------------
 // Motor A
-constexpr int PIN_ENA1 = 13;  // PWM speed
-constexpr int PIN_IN1  = 12;  // direction (strapping pin, see README)
-constexpr int PIN_IN2  = 14;  // direction
+constexpr int PIN_ENA1 = 14;  // PWM speed
+constexpr int PIN_IN1  = 27;  // direction
+constexpr int PIN_IN2  = 26;  // direction
 // Motor B
-constexpr int PIN_ENA2 = 27;  // PWM speed
-constexpr int PIN_IN3  = 26;  // direction
-constexpr int PIN_IN4  = 25;  // direction
+constexpr int PIN_ENA2 = 25;  // PWM speed
+constexpr int PIN_IN3  = 33;  // direction
+constexpr int PIN_IN4  = 32;  // direction
 
 // SBUS input from FS-iA6B
 constexpr int PIN_SBUS_RX = 15;

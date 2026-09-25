@@ -9,12 +9,12 @@ drive fallback for when the RC transmitter is not connected.
 
 | ESP32 pin | Connects to | Purpose |
 |-----------|-------------|---------|
-| D13 | XY-160D ENA1 | Motor A (left) speed, PWM |
-| D12 | XY-160D IN1 | Motor A direction |
-| D14 | XY-160D IN2 | Motor A direction |
-| D27 | XY-160D ENA2 | Motor B (right) speed, PWM |
-| D26 | XY-160D IN3 | Motor B direction |
-| D25 | XY-160D IN4 | Motor B direction |
+| D14 | XY-160D ENA1 | Motor A (left) speed, PWM |
+| D27 | XY-160D IN1 | Motor A direction |
+| D26 | XY-160D IN2 | Motor A direction |
+| D25 | XY-160D ENA2 | Motor B (right) speed, PWM |
+| D33 | XY-160D IN3 | Motor B direction |
+| D32 | XY-160D IN4 | Motor B direction |
 | D15 | FS-iA6B SERVO/i-BUS "SBUS" signal | RC input |
 | GND | XY-160D GND and receiver GND | Common ground (required) |
 
@@ -22,11 +22,8 @@ Power the receiver from 5 V (the FS-iA6B accepts 4.0-6.5 V). The SBUS signal
 is inverted serial; the ESP32 UART inverts it in hardware, so no inverter
 circuit is needed.
 
-**Boot pin note:** GPIO12 (IN1) is an ESP32 strapping pin. If the motor
-driver pulls it high while the ESP32 powers up, the board will fail to boot
-(flash voltage is set to 1.8 V). If you see boot loops with the driver
-connected, move IN1 to another pin (e.g. GPIO33) and update `src/config.h`.
-GPIO15 (SBUS) is also a strapping pin but only affects boot log output.
+GPIO15 (SBUS) is an ESP32 strapping pin, but it only controls boot log
+output, so the receiver signal on it is harmless.
 
 ## Behaviour
 
@@ -76,9 +73,7 @@ Change the network name and password in `src/config.h`.
    or leave the motor power supply off.
 5. **Upload.** Click the right-arrow "Upload" button in the blue status bar,
    or run `pio run -t upload`. If it stops at `Connecting....___`, hold the
-   **BOOT** button on the board until the upload starts. If it fails to
-   connect at all, unplug the wire on D12 (IN1) and try again (see the boot
-   pin note above).
+   **BOOT** button on the board until the upload starts.
 6. **Watch the serial monitor.** Click the plug icon in the status bar, or
    run `pio device monitor` (115200 baud). You should see
    `Walking table controller ready` and the WiFi address.

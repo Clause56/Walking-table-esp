@@ -57,11 +57,34 @@ joystick is released or the page stops sending commands for 400 ms.
 
 Change the network name and password in `src/config.h`.
 
-## Building and flashing
+## Flashing and testing
 
-Install [PlatformIO](https://platformio.org/) (VS Code extension or CLI), then:
-
-```sh
-pio run -t upload
-pio device monitor
-```
+1. **Install the tools.** Install [VS Code](https://code.visualstudio.com/),
+   then the **PlatformIO IDE** extension from the Extensions panel. If your
+   computer doesn't see the board, install the USB-serial driver for the chip
+   on your DevKit (CP210x or CH340).
+2. **Get the code.** Clone the repo with
+   `git clone https://github.com/Clause56/Walking-table-esp`, or download it
+   as a ZIP from GitHub. Until the pull request is merged the code is on the
+   `motor-controller` branch (`git checkout motor-controller`, or pick that
+   branch before downloading the ZIP).
+3. **Open the folder** in VS Code (File > Open Folder). PlatformIO sees
+   `platformio.ini` and downloads the ESP32 toolchain the first time, which
+   takes a few minutes.
+4. **Connect the ESP32** with a USB data cable (some cables are charge-only).
+   For the first test, lift the table so the wheels/legs are off the ground,
+   or leave the motor power supply off.
+5. **Upload.** Click the right-arrow "Upload" button in the blue status bar,
+   or run `pio run -t upload`. If it stops at `Connecting....___`, hold the
+   **BOOT** button on the board until the upload starts. If it fails to
+   connect at all, unplug the wire on D12 (IN1) and try again (see the boot
+   pin note above).
+6. **Watch the serial monitor.** Click the plug icon in the status bar, or
+   run `pio device monitor` (115200 baud). You should see
+   `Walking table controller ready` and the WiFi address.
+7. **Test.** Join the `WalkingTable` WiFi network (password `walktable123`),
+   open http://192.168.4.1/, and check the RC link shows *connected* when the
+   transmitter is on. Move the sticks gently and check each motor turns the
+   right way; flip `MOTOR_A_REVERSED` / `MOTOR_B_REVERSED` in
+   `src/config.h` if one runs backwards. Turn the transmitter off to check
+   the motors stop and the page's joystick takes over.

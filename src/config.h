@@ -63,3 +63,16 @@ constexpr const char *WIFI_AP_PASSWORD = "walktable123";  // >= 8 chars
 
 // Web manual drive: motors stop if the page stops sending for this long.
 constexpr uint32_t WEB_CMD_TIMEOUT_MS = 400;
+
+// ---------------------------------------------------------------------------
+// Power-up (shared supply for ESP32 and XY-160D)
+// ---------------------------------------------------------------------------
+// After reset, hold every driver input LOW for this long before starting WiFi
+// or accepting drive commands, so the supply and the driver's own logic have
+// settled before the radio's current spikes and any motor current arrive.
+constexpr uint32_t POWER_SETTLE_MS = 500;
+
+// WiFi transmit power. Full power (19.5 dBm) draws current spikes of several
+// hundred mA that can brown out a shared 5 V / 3.3 V rail. 8.5 dBm is plenty
+// for a phone a few metres away. Set to WIFI_POWER_19_5dBm for full range.
+#define WIFI_TX_POWER WIFI_POWER_8_5dBm

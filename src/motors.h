@@ -6,6 +6,9 @@
 class Motor {
  public:
   Motor(int pinEn, int pinInA, int pinInB, int pwmChannel, bool reversed);
+  // Drive all three pins LOW as plain GPIO. Call first thing in setup(),
+  // before anything slow, so the driver never sees floating inputs.
+  void holdOff();
   void begin();
   // Target speed -1000..1000. Applied gradually by update().
   void setTarget(int speed) { target_ = constrain(speed, -1000, 1000); }

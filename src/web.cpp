@@ -37,6 +37,7 @@ small{color:#999}
 <div class="row"><span>Control source</span><b id="src">-</b></div>
 <div class="row"><span>SBUS frames</span><span id="fr">-</span></div>
 <div class="row"><span>Uptime</span><span id="up">-</span></div>
+<div class="row"><span>Last reset</span><span id="rs">-</span></div>
 <div>Left motor <span id="lv"></span></div><div class="bar"><i id="lb"></i></div>
 <div>Right motor <span id="rv"></span></div><div class="bar"><i id="rb"></i></div>
 <small id="ch"></small>
@@ -60,6 +61,7 @@ async function poll(){
  $('src').textContent=s.enabled?s.source:'DISABLED';$('src').className=s.enabled?'':'warn';
  $('fr').textContent=s.frames+(s.frames?' ('+s.since+' ms ago)':'');
  $('up').textContent=Math.floor(s.uptime/1000)+' s';
+ $('rs').textContent=s.reset+(s.resets?' ('+s.resets+' resets since power-up)':'');$('rs').className=s.resets?'warn':'';
  $('lv').textContent=s.left/10+'%';$('rv').textContent=s.right/10+'%';bar($('lb'),s.left);bar($('rb'),s.right);
  $('ch').textContent=s.rc?'CH1-6: '+s.ch.join(' '):'';
  $('en').textContent=s.enabled?'ENABLED (tap to disable)':'DISABLED (tap to enable)';$('en').className=s.enabled?'on':'off';
@@ -86,7 +88,7 @@ setInterval(()=>{if(held)send();},100);
 
 void handleStatus() {
   String j;
-  j.reserve(256);
+  j.reserve(320);
   j += "{\"enabled\":";
   j += st->enabled ? "true" : "false";
   j += ",\"rc\":";
@@ -105,6 +107,10 @@ void handleStatus() {
   j += mR->current();
   j += ",\"uptime\":";
   j += millis();
+  j += ",\"reset\":\"";
+  j += st->resetReason;
+  j += "\",\"resets\":";
+  j += st->resetCount;
   j += ",\"ch\":[";
   for (int c = 1; c <= 6; c++) {
     if (c > 1) j += ',';
@@ -150,6 +156,7 @@ void webBegin(ControllerState &state, SbusReceiver &sbus, Motor &left, Motor &ri
 
   WiFi.mode(WIFI_AP);
   WiFi.softAP(WIFI_AP_SSID, WIFI_AP_PASSWORD);
+  WiFi.setTxPower(WIFI_TX_POWER);  // limits radio current spikes on a shared supply
   Serial.printf("WiFi AP \"%s\" up, open http://%s/\n", WIFI_AP_SSID,
                 WiFi.softAPIP().toString().c_str());
 

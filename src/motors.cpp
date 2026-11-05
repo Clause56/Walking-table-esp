@@ -4,11 +4,17 @@
 Motor::Motor(int pinEn, int pinInA, int pinInB, int pwmChannel, bool reversed)
     : pinEn_(pinEn), pinInA_(pinInA), pinInB_(pinInB), pwmChannel_(pwmChannel), reversed_(reversed) {}
 
+void Motor::holdOff() {
+  // Write the level before switching to output so the pin never glitches HIGH.
+  for (int pin : {pinEn_, pinInA_, pinInB_}) {
+    digitalWrite(pin, LOW);
+    pinMode(pin, OUTPUT);
+    digitalWrite(pin, LOW);
+  }
+}
+
 void Motor::begin() {
-  pinMode(pinInA_, OUTPUT);
-  pinMode(pinInB_, OUTPUT);
-  digitalWrite(pinInA_, LOW);
-  digitalWrite(pinInB_, LOW);
+  holdOff();
 #if ESP_ARDUINO_VERSION_MAJOR >= 3
   ledcAttachChannel(pinEn_, PWM_FREQ_HZ, PWM_BITS, pwmChannel_);
 #else

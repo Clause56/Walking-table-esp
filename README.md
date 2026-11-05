@@ -25,6 +25,24 @@ circuit is needed.
 GPIO15 (SBUS) is an ESP32 strapping pin, but it only controls boot log
 output, so the receiver signal on it is harmless.
 
+### Running the ESP32 and XY-160D from one supply
+
+- Feed the ESP32 from a regulated 5 V into **VIN** (a buck converter rated
+  1 A or more), not from the motor battery directly, and put a 470-1000 uF
+  capacitor across that 5 V near the ESP32.
+- Run the ESP32 ground and the motor ground back to the supply as separate
+  wires that meet at the supply's negative terminal (star ground), so motor
+  current does not flow through the ESP32's ground wire.
+- Put a 10 k pull-down resistor from **ENA1 (D14)** and **ENA2 (D25)** to GND.
+  During the first ~0.3 s after power-up the ESP32 pins are not yet under
+  firmware control (D14 even toggles during boot), and the pull-downs keep the
+  driver off until the firmware takes over.
+- The status page shows **Last reset**. If it reads `BROWNOUT` or the reset
+  count climbs, the supply is dipping, usually when the motors start.
+- After reset the firmware holds all driver inputs LOW for 0.5 s
+  (`POWER_SETTLE_MS`) and runs WiFi at reduced power (`WIFI_TX_POWER`) to keep
+  current spikes off the shared rail.
+
 ## Behaviour
 
 - **RC has priority.** While valid SBUS frames arrive, the sticks drive the motors.

@@ -5,6 +5,10 @@
 // ---------------------------------------------------------------------------
 // Motor A
 constexpr int PIN_ENA1 = 14;  // PWM speed
+// Second copy of the ENA1 signal while moving the wire off D14 (D14 pulses
+// during boot). Both pins carry the same PWM. Set to -1 once the wire is moved
+// (and change PIN_ENA1 to 18).
+constexpr int PIN_ENA1_ALT = 18;
 constexpr int PIN_IN1  = 27;  // direction
 constexpr int PIN_IN2  = 26;  // direction
 // Motor B
@@ -63,3 +67,11 @@ constexpr const char *WIFI_AP_PASSWORD = "walktable123";  // >= 8 chars
 
 // Web manual drive: motors stop if the page stops sending for this long.
 constexpr uint32_t WEB_CMD_TIMEOUT_MS = 400;
+
+// ---------------------------------------------------------------------------
+// Power-up (shared supply for ESP32 and XY-160D)
+// ---------------------------------------------------------------------------
+// After reset, hold every driver input LOW for this long before starting WiFi
+// or accepting drive commands, so the supply and the driver's own logic have
+// settled before the radio's current spikes and any motor current arrive.
+constexpr uint32_t POWER_SETTLE_MS = 500;

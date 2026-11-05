@@ -19,3 +19,17 @@ jobs:
           python-version: "3.11"
       - run: pip install platformio
       - run: pio run
+      # One merged image (bootloader + partitions + app) that flashes at 0x0,
+      # e.g. from a browser with https://espressif.github.io/esptool-js/
+      - run: |
+          pip install esptool==4.8.1
+          B=.pio/build/esp32doit-devkit-v1
+          esptool.py --chip esp32 merge_bin -o walking-table-full.bin \
+            --flash_mode dio --flash_freq 40m --flash_size 4MB \
+            0x1000 $B/bootloader.bin 0x8000 $B/partitions.bin \
+            0xe000 ~/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin \
+            0x10000 $B/firmware.bin
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: walking-table-full.bin

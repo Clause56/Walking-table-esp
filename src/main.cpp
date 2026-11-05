@@ -3,6 +3,7 @@
 // (SBUS), with a WiFi status page, enable/disable, and manual fallback drive.
 
 #include <Arduino.h>
+#include <esp_system.h>
 
 #include "config.h"
 #include "motors.h"
@@ -14,9 +15,42 @@ namespace {
 constexpr int PIN_STATUS_LED = 2;  // on-board blue LED
 
 SbusReceiver sbus;
-Motor motorLeft(PIN_ENA1, PIN_IN1, PIN_IN2, PWM_CH_A, MOTOR_A_REVERSED);
+Motor motorLeft(PIN_ENA1, PIN_IN1, PIN_IN2, PWM_CH_A, MOTOR_A_REVERSED, PIN_ENA1_ALT);
 Motor motorRight(PIN_ENA2, PIN_IN3, PIN_IN4, PWM_CH_B, MOTOR_B_REVERSED);
 ControllerState state;
+
+// Survives every reset except loss of power, so it counts resets since the
+// supply came up (brownouts may also clear it if the rail fell far enough).
+RTC_NOINIT_ATTR uint32_t rtcResetCount;
+RTC_NOINIT_ATTR uint32_t rtcMagic;
+constexpr uint32_t RTC_MAGIC = 0x57414C4B;  // "WALK"
+
+const char *resetReasonName(esp_reset_reason_t r) {
+  switch (r) {
+    case ESP_RST_POWERON: return "power-on";
+    case ESP_RST_BROWNOUT: return "BROWNOUT (supply dipped)";
+    case ESP_RST_SW: return "software";
+    case ESP_RST_PANIC: return "crash";
+    case ESP_RST_INT_WDT:
+    case ESP_RST_TASK_WDT:
+    case ESP_RST_WDT: return "watchdog";
+    case ESP_RST_EXT: return "reset pin";
+    case ESP_RST_DEEPSLEEP: return "deep sleep";
+    default: return "unknown";
+  }
+}
+
+void recordReset() {
+  esp_reset_reason_t r = esp_reset_reason();
+  if (r == ESP_RST_POWERON || rtcMagic != RTC_MAGIC) {
+    rtcMagic = RTC_MAGIC;
+    rtcResetCount = 0;
+  } else {
+    rtcResetCount++;
+  }
+  state.resetReason = resetReasonName(r);
+  state.resetCount = rtcResetCount;
+}
 
 int applyDeadband(int v) {
   if (abs(v) < RC_DEADBAND) return 0;
@@ -60,11 +94,24 @@ void updateStatusLed(bool rcOk) {
 }  // namespace
 
 void setup() {
+  // Driver inputs LOW before anything else, so the H-bridge sees a clean
+  // "off" while the rest of the system powers up.
+  motorLeft.holdOff();
+  motorRight.holdOff();
+  pinMode(PIN_STATUS_LED, OUTPUT);
+  digitalWrite(PIN_STATUS_LED, HIGH);
+
   Serial.begin(115200);
+  recordReset();
+  Serial.printf("Reset reason: %s (resets since power-up: %u)\n", state.resetReason,
+                (unsigned)state.resetCount);
+
+  // Let the shared supply and the XY-160D settle before the WiFi radio and
+  // motors start drawing current.
+  delay(POWER_SETTLE_MS);
+
   motorLeft.begin();
   motorRight.begin();
-  pinMode(PIN_STATUS_LED, OUTPUT);
-
   sbus.begin(Serial2, PIN_SBUS_RX);
   webBegin(state, sbus, motorLeft, motorRight);
   Serial.println("Walking table controller ready");

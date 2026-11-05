@@ -1,19 +1,30 @@
 #include "motors.h"
 #include "config.h"
 
-Motor::Motor(int pinEn, int pinInA, int pinInB, int pwmChannel, bool reversed)
-    : pinEn_(pinEn), pinInA_(pinInA), pinInB_(pinInB), pwmChannel_(pwmChannel), reversed_(reversed) {}
+Motor::Motor(int pinEn, int pinInA, int pinInB, int pwmChannel, bool reversed, int pinEnAlt)
+    : pinEn_(pinEn), pinInA_(pinInA), pinInB_(pinInB), pwmChannel_(pwmChannel),
+      pinEnAlt_(pinEnAlt), reversed_(reversed) {}
+
+void Motor::holdOff() {
+  // Write the level before switching to output so the pin never glitches HIGH.
+  for (int pin : {pinEn_, pinInA_, pinInB_, pinEnAlt_}) {
+    if (pin < 0) continue;
+    digitalWrite(pin, LOW);
+    pinMode(pin, OUTPUT);
+    digitalWrite(pin, LOW);
+  }
+}
 
 void Motor::begin() {
-  pinMode(pinInA_, OUTPUT);
-  pinMode(pinInB_, OUTPUT);
-  digitalWrite(pinInA_, LOW);
-  digitalWrite(pinInB_, LOW);
+  holdOff();
 #if ESP_ARDUINO_VERSION_MAJOR >= 3
   ledcAttachChannel(pinEn_, PWM_FREQ_HZ, PWM_BITS, pwmChannel_);
+  // Same channel, so ledcWrite on pinEn_ drives both pins.
+  if (pinEnAlt_ >= 0) ledcAttachChannel(pinEnAlt_, PWM_FREQ_HZ, PWM_BITS, pwmChannel_);
 #else
   ledcSetup(pwmChannel_, PWM_FREQ_HZ, PWM_BITS);
   ledcAttachPin(pinEn_, pwmChannel_);
+  if (pinEnAlt_ >= 0) ledcAttachPin(pinEnAlt_, pwmChannel_);
 #endif
   apply(0);
 }

@@ -9,7 +9,7 @@ drive fallback for when the RC transmitter is not connected.
 
 | ESP32 pin | Connects to | Purpose |
 |-----------|-------------|---------|
-| D14 | XY-160D ENA1 | Motor A (left) speed, PWM |
+| D14 or D18 | XY-160D ENA1 | Motor A (left) speed, PWM (same signal on both pins, see below) |
 | D27 | XY-160D IN1 | Motor A direction |
 | D26 | XY-160D IN2 | Motor A direction |
 | D25 | XY-160D ENA2 | Motor B (right) speed, PWM |
@@ -24,6 +24,28 @@ circuit is needed.
 
 GPIO15 (SBUS) is an ESP32 strapping pin, but it only controls boot log
 output, so the receiver signal on it is harmless.
+
+### Running the ESP32 and XY-160D from one supply
+
+- Feed the ESP32 from a regulated 5 V into **VIN** (a buck converter rated
+  1 A or more), not from the motor battery directly, and put a 470-1000 uF
+  capacitor across that 5 V near the ESP32.
+- Run the ESP32 ground and the motor ground back to the supply as separate
+  wires that meet at the supply's negative terminal (star ground), so motor
+  current does not flow through the ESP32's ground wire.
+- Put a 10 k pull-down resistor from **ENA1 (D14)** and **ENA2 (D25)** to GND.
+  During the first ~0.3 s after power-up the ESP32 pins are not yet under
+  firmware control (D14 even toggles during boot), and the pull-downs keep the
+  driver off until the firmware takes over.
+- D14 also toggles during boot. The firmware outputs ENA1 on both D14 and
+  D18 so you can move the ENA1 wire to D18 without reflashing. Once moved, set
+  `PIN_ENA1 = 18` and `PIN_ENA1_ALT = -1` in `src/config.h`.
+- The status page shows **Last reset**. If it reads `BROWNOUT` or the reset
+  count climbs, the supply is dipping, usually when the motors start.
+- After reset the firmware holds all driver inputs LOW for 0.5 s
+  (`POWER_SETTLE_MS`) before starting WiFi, so the supply settles before the
+  radio's current spikes arrive. WiFi runs at full power, so the 5 V supply
+  and capacitor above need to handle those spikes.
 
 ## Behaviour
 

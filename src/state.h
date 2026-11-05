@@ -13,6 +13,11 @@ struct ControllerState {
   int webRight = 0;
   uint32_t webCmdMs = 0;
   bool webCmdValid = false;
+
+  // Why the chip last restarted, and how many resets since power was applied.
+  // A brownout count that climbs while driving means the supply sags.
+  const char *resetReason = "unknown";
+  uint32_t resetCount = 0;
 };
 
 inline const char *sourceName(DriveSource s) {

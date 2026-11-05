@@ -156,7 +156,6 @@ void webBegin(ControllerState &state, SbusReceiver &sbus, Motor &left, Motor &ri
 
   WiFi.mode(WIFI_AP);
   WiFi.softAP(WIFI_AP_SSID, WIFI_AP_PASSWORD);
-  WiFi.setTxPower(WIFI_TX_POWER);  // limits radio current spikes on a shared supply
   Serial.printf("WiFi AP \"%s\" up, open http://%s/\n", WIFI_AP_SSID,
                 WiFi.softAPIP().toString().c_str());
 

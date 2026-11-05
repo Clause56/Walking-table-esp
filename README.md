@@ -40,8 +40,9 @@ output, so the receiver signal on it is harmless.
 - The status page shows **Last reset**. If it reads `BROWNOUT` or the reset
   count climbs, the supply is dipping, usually when the motors start.
 - After reset the firmware holds all driver inputs LOW for 0.5 s
-  (`POWER_SETTLE_MS`) and runs WiFi at reduced power (`WIFI_TX_POWER`) to keep
-  current spikes off the shared rail.
+  (`POWER_SETTLE_MS`) before starting WiFi, so the supply settles before the
+  radio's current spikes arrive. WiFi runs at full power, so the 5 V supply
+  and capacitor above need to handle those spikes.
 
 ## Behaviour
 

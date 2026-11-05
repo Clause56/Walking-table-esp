@@ -5,7 +5,8 @@
 //   INa=H INb=L forward, INa=L INb=H reverse, both L = coast/stop.
 class Motor {
  public:
-  Motor(int pinEn, int pinInA, int pinInB, int pwmChannel, bool reversed);
+  // pinEnAlt (optional, -1 for none) carries a copy of the ENA PWM signal.
+  Motor(int pinEn, int pinInA, int pinInB, int pwmChannel, bool reversed, int pinEnAlt = -1);
   // Drive all three pins LOW as plain GPIO. Call first thing in setup(),
   // before anything slow, so the driver never sees floating inputs.
   void holdOff();
@@ -22,7 +23,7 @@ class Motor {
  private:
   void apply(int speed);
 
-  int pinEn_, pinInA_, pinInB_, pwmChannel_;
+  int pinEn_, pinInA_, pinInB_, pwmChannel_, pinEnAlt_;
   bool reversed_;
   int target_ = 0;
   float current_ = 0;

@@ -15,7 +15,7 @@ namespace {
 constexpr int PIN_STATUS_LED = 2;  // on-board blue LED
 
 SbusReceiver sbus;
-Motor motorLeft(PIN_ENA1, PIN_IN1, PIN_IN2, PWM_CH_A, MOTOR_A_REVERSED);
+Motor motorLeft(PIN_ENA1, PIN_IN1, PIN_IN2, PWM_CH_A, MOTOR_A_REVERSED, PIN_ENA1_ALT);
 Motor motorRight(PIN_ENA2, PIN_IN3, PIN_IN4, PWM_CH_B, MOTOR_B_REVERSED);
 ControllerState state;
 

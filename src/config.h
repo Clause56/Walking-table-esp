@@ -5,6 +5,10 @@
 // ---------------------------------------------------------------------------
 // Motor A
 constexpr int PIN_ENA1 = 14;  // PWM speed
+// Second copy of the ENA1 signal while moving the wire off D14 (D14 pulses
+// during boot). Both pins carry the same PWM. Set to -1 once the wire is moved
+// (and change PIN_ENA1 to 18).
+constexpr int PIN_ENA1_ALT = 18;
 constexpr int PIN_IN1  = 27;  // direction
 constexpr int PIN_IN2  = 26;  // direction
 // Motor B
